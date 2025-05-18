@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diabetes Prediction</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(33, 150, 243, 0.2);
+            max-width: 900px;
+            width: 95%;
+            padding: 16px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-section, .result-section {
+            flex: 1;
+            padding: 16px;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #1565c0;
+            border-bottom: 1px solid #90caf9;
+            padding-bottom: 6px;
+            margin-bottom: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            font-size: 13px;
+            color: #0d47a1;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: #1976d2;
+            cursor: pointer;
+            height: 4px;
+        }
+
+        output {
+            font-weight: bold;
+            font-size: 12px;
+            color: #1565c0;
+        }
+
+        .predict-btn {
+            margin-top: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, background-color 0.3s ease;
+        }
+
+        .predict-btn:hover {
+            background-color: #0d47a1;
+            transform: scale(1.05);
+        }
+
+        .result-box {
+            background-color: #a9ffd8;
+            border: 1px solid #90caf9;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 3px 10px rgba(25, 118, 210, 0.1);
+        }
+
+        .result-box strong {
+            color: #0d47a1;
+        }
+
+        .metric-label {
+            font-weight: bold;
+            color: #1976d2;
+            font-size: 13px;
+        }
+
+        .metric-value {
+            color: #0d47a1;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+    <script>
+        function updateOutput(sliderId, outputId) {
+            const slider = document.getElementById(sliderId);
+            const output = document.getElementById(outputId);
+            output.value = slider.value;
+            slider.oninput = () => output.value = slider.value;
+        }
+    </script>
+</head>
+<body onload="
+    updateOutput('glucose','out_glucose');
+    updateOutput('insulin','out_insulin');
+    updateOutput('bmi','out_bmi');
+    updateOutput('dpf','out_dpf');
+    updateOutput('age','out_age');
+">
+    <div class="container">
+        <!-- Left side: Form -->
+        <div class="form-section">
+            <h2>Input Parameters</h2>
+            <form action="/predict" method="post">
+                <div class="input-group">
+                    <label>Glucose <output id="out_glucose"></output></label>
+                    <input type="range" id="glucose" name="glucose" min="0" max="200" step="1" value="100">
+                </div>
+                <div class="input-group">
+                    <label>Insulin <output id="out_insulin"></output></label>
+                    <input type="range" id="insulin" name="insulin" min="0" max="846" step="1" value="100">
+                </div>
+                <div class="input-group">
+                    <label>BMI <output id="out_bmi"></output></label>
+                    <input type="range" id="bmi" name="bmi" min="10" max="70" step="0.1" value="30">
+                </div>
+                <div class="input-group">
+                    <label>Diabetes Pedigree Function <output id="out_dpf"></output></label>
+                    <input type="range" id="dpf" name="dpf" min="0.0" max="2.5" step="0.01" value="0.5">
+                </div>
+                <div class="input-group">
+                    <label>Age <output id="out_age"></output></label>
+                    <input type="range" id="age" name="age" min="10" max="100" step="1" value="30">
+                </div>
+                <input type="submit" class="predict-btn" value="Predict">
+            </form>
+        </div>
+
+        <!-- Right side: Results -->
+        <div class="result-section">
+            <h2>Prediction Result</h2>
+
+            {% if prediction_text %}
+            <div class="result-box">
+                <strong>{{ prediction_text }}</strong>
+            </div>
+            {% endif %}
+
+            {% if accuracy %}
+            <h2>Model Metrics</h2>
+            <div class="result-box">
+                <p><span class="metric-label">Accuracy:</span> <span class="metric-value">{{ accuracy }}</span></p>
+                <p><span class="metric-label">Precision:</span> <span class="metric-value">{{ precision }}</span></p>
+                <p><span class="metric-label">Recall:</span> <span class="metric-value">{{ recall }}</span></p>
+                <p><span class="metric-label">F1 Score:</span> <span class="metric-value">{{ f1 }}</span></p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
